@@ -5,6 +5,7 @@ from twitchio.ext import commands
 
 from kogbeans.cogs import reward_redemptions
 from kogbeans.cogs import emergency_meetings
+from kogbeans.cogs import gamble_meta
 
 
 logger = logging.getLogger("kogbeans")
@@ -47,9 +48,25 @@ def main():
         reward_name="Emergency Meeting!",
         eject_ties=True,
     )
+    gamble_meta_cog = gamble_meta.prepare(
+        bot=bot,
+        broadcaster_name=os.environ["BROADCASTER_CHANNEL"],
+        default_user_cooldown=120,
+        default_luck=45,
+        lucky_dice_luck_increment=10,
+        lucky_dice_luck_limit=5,
+        lucky_dice_duration=600,
+        spam_roulette_duration=60,
+        lucky_dice_reward_name="Lucky Dice",
+        spam_roulette_reward_name="Spam Roulette",
+        stream_elements_account_id=os.environ["STREAMELEMENTS_CHANNEL_ID"],
+        stream_elements_jwt_token=os.environ["STREAMELEMENTS_JWT_TOKEN"],
+    )
 
-    rewards = emergency_meetings_cog.get_reward_redemptions()
-    reward_redemptions_cog = reward_redemptions.prepare(
+    rewards = (
+        emergency_meetings_cog.get_reward_redemptions() + gamble_meta_cog.get_reward_redemptions()
+    )
+    reward_redemptions.prepare(
         bot=bot,
         broadcaster_oauth_token=os.environ["BROADCASTER_USER_OAUTH_TOKEN"],
         broadcaster_id=int(os.environ["BROADCASTER_CHANNEL_ID"]),
